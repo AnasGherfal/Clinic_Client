@@ -42,52 +42,42 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     const checkTokenExpiration = async () => {
       const user = firebaseAuth.currentUser;
       if (user) {
-        const token = localStorage.getItem("authToken");
-        if (token) {
-          try {
-            const tokenResult = await user.getIdTokenResult();
-            const expirationTime = new Date(tokenResult.expirationTime).valueOf();
+        try {
+          const tokenResult = await user.getIdTokenResult();
+          const expirationTimestamp = new Date(
+            tokenResult.expirationTime
+          ).toUTCString();
+          const currentTime = new Date().toUTCString();
+          const expirationTimestampMillis = Date.parse(expirationTimestamp); // Convert expiration time string to milliseconds
+          const currentTimeMillis = Date.parse(currentTime);
+          console.log(expirationTimestamp, "d");
+          console.log(currentTime);
 
-            await chequeLogout(expirationTime);
-            // if (expirationTime < currentTime) {
-            //   await SignOut();
-            //   setCurrentUser(null);
-            // } else {
-              
-            //   const delayTime = expirationTime.valueOf() - currentTime.valueOf();
-            //   setTimeout(async () => {
-            //     await checkTokenExpiration();
-            //   }, delayTime);
-            // }
-          } catch (error) {
-            console.error("Error checking token expiration:", error);
+          if (expirationTimestampMillis <= currentTimeMillis) {
+            console.log(true);
+            await SignOut();
+            setCurrentUser(null);
+          } else {
+            const timeUntilExpiration =
+              expirationTimestampMillis - currentTimeMillis;
+            console.log(
+              "Token expires in:",
+              timeUntilExpiration,
+              "milliseconds"
+            );
           }
-        } 
+        } catch (error) {}
       }
     };
+
     checkTokenExpiration();
-
-    const chequeLogout = async (expirationTime : number) => {
-      const currentTime = new Date().valueOf();
-      if (expirationTime <= currentTime) {
-        await SignOut();
-        setCurrentUser(null);
-      } else {
-        
-        const delayTime = expirationTime - currentTime;
-        setTimeout(async () => {
-          await chequeLogout(expirationTime);
-        }, delayTime);
-      }
-    }
-
     return () => {
       unsubscribe();
     };
   }, []);
 
   if (loading) {
-    return <Loading/>;
+    return <Loading />;
   }
 
   if (error) {
