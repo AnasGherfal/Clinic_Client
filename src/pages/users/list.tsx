@@ -16,6 +16,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  CircularProgress, // Import CircularProgress for loading indicator
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -27,15 +28,16 @@ import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
 const UserTable = () => {
   const navigate = useNavigate();
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [users, setUsers] = useState<User[] | undefined>(undefined);
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [snackbarSeverity, setSnackbarSeverity] =
-    useState<AlertProps["severity"]>("success");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertProps["severity"]>("success");
+  const [loading, setLoading] = useState(true); // Loading state
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -46,8 +48,9 @@ const UserTable = () => {
       } catch (error) {
         setSnackbarSeverity("error");
         setSnackbarMessage("Error fetching users");
-
         setOpenSnackbar(true);
+      } finally {
+        setLoading(false); // Turn off loading indicator regardless of success or failure
       }
     };
 
@@ -72,14 +75,11 @@ const UserTable = () => {
     if (selectedUserId) {
       try {
         await deleteUser(selectedUserId);
-
-        // Update the state to remove the deleted user locally
         setUsers((prevUsers) =>
           prevUsers?.filter(
             (user) => user.id.toString() !== selectedUserId.toString()
           )
         );
-
         setSnackbarMessage("User deleted successfully");
         setOpenSnackbar(true);
       } catch (error) {
@@ -97,13 +97,14 @@ const UserTable = () => {
     setDeleteConfirmationOpen(false);
     setSelectedUserId(null);
   };
+
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
+
   return (
     <>
       <Outlet />
-
       <TableContainer component={Paper}>
         <Button
           variant="contained"
@@ -119,42 +120,48 @@ const UserTable = () => {
         >
           Add User
         </Button>
-        <Table sx={{ minWidth: 700 }} aria-label="customized table">
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ borderBottom: "none" }}>First Name</TableCell>
-              <TableCell sx={{ borderBottom: "none" }}>Last Name</TableCell>
-              <TableCell sx={{ borderBottom: "none" }}>Email</TableCell>
-              <TableCell sx={{ borderBottom: "none" }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {users
-              ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.firstName}</TableCell>
-                  <TableCell>{user.lastName}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <IconButton
-                      color="primary"
-                      onClick={() => navigate(`/users/${user.id}`)}
-                      sx={{ margin: "0 5px" }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      sx={{ margin: "0 5px", color:"#F24949" }}
-                      onClick={() => handleDeleteUser(user.id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
+        {loading ? ( // Render loading indicator if loading is true
+          <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+            <CircularProgress />
+          </div>
+        ) : (
+          <Table sx={{ minWidth: 700 }} aria-label="customized table">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ borderBottom: "none" }}>First Name</TableCell>
+                <TableCell sx={{ borderBottom: "none" }}>Last Name</TableCell>
+                <TableCell sx={{ borderBottom: "none" }}>Email</TableCell>
+                <TableCell sx={{ borderBottom: "none" }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {users
+                ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.firstName}</TableCell>
+                    <TableCell>{user.lastName}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <IconButton
+                        color="primary"
+                        onClick={() => navigate(`/users/${user.id}`)}
+                        sx={{ margin: "0 5px" }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        sx={{ margin: "0 5px", color: "#F24949" }}
+                        onClick={() => handleDeleteUser(user.id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        )}
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
@@ -165,20 +172,16 @@ const UserTable = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </TableContainer>
-      <Snackbar
-          open={openSnackbar}
-          autoHideDuration={6000}
+      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <MuiAlert
+          elevation={6}
+          variant="filled"
           onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
         >
-          <MuiAlert
-            elevation={6}
-            variant="filled"
-            onClose={handleCloseSnackbar}
-            severity={snackbarSeverity}
-          >
-            {snackbarMessage}
-          </MuiAlert>
-        </Snackbar>
+          {snackbarMessage}
+        </MuiAlert>
+      </Snackbar>
       <Dialog
         open={deleteConfirmationOpen}
         onClose={handleCancelDelete}
@@ -193,7 +196,7 @@ const UserTable = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete}>Cancel</Button>
-          <Button onClick={handleConfirmDelete}  sx={{ color: "#F24949" }}>
+          <Button onClick={handleConfirmDelete} sx={{ color: "#F24949" }}>
             Delete
           </Button>
         </DialogActions>
