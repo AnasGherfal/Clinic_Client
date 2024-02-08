@@ -164,7 +164,7 @@ const UserTable = () => {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-      </TableContainer>chque
+      </TableContainer>
       <Snackbar
           open={openSnackbar}
           autoHideDuration={6000}
