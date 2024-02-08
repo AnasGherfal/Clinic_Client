@@ -50,21 +50,15 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
           const currentTime = new Date().toUTCString();
           const expirationTimestampMillis = Date.parse(expirationTimestamp); // Convert expiration time string to milliseconds
           const currentTimeMillis = Date.parse(currentTime);
-          console.log(expirationTimestamp, "d");
-          console.log(currentTime);
+      
 
           if (expirationTimestampMillis <= currentTimeMillis) {
-            console.log(true);
             await SignOut();
             setCurrentUser(null);
           } else {
             const timeUntilExpiration =
               expirationTimestampMillis - currentTimeMillis;
-            console.log(
-              "Token expires in:",
-              timeUntilExpiration,
-              "milliseconds"
-            );
+
           }
         } catch (error) {}
       }
