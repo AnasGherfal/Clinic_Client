@@ -150,6 +150,9 @@ const FullCalendarTimeline: React.FC = () => {
 
   const handleCreateDialogClose = () => {
     setOpenCreateDialog(false);
+    setAppointmentTitle("");
+    setStartDate(null);
+    setEndDate(null);
   };
 
   const handleCreateAppointmentSubmit = async () => {
@@ -162,6 +165,9 @@ const FullCalendarTimeline: React.FC = () => {
 
       setSnackbarMessage("Appointment created successfully!");
       setOpenSnackbar(true);
+      setAppointmentTitle("");
+      setStartDate(null);
+      setEndDate(null);
     } catch (error) {
       console.error("Error creating appointment:", error);
       setSnackbarSeverity("error");
