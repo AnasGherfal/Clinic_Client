@@ -3,7 +3,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent"; 
+import CardContent from "@mui/material/CardContent";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import Button from "@mui/material/Button";
@@ -168,10 +168,9 @@ const FullCalendarTimeline: React.FC = () => {
       setAppointmentTitle("");
       setStartDate(null);
       setEndDate(null);
-    } catch (error) {
-      console.error("Error creating appointment:", error);
+    } catch (error:any) {
       setSnackbarSeverity("error");
-      setSnackbarMessage("Error creating appointment.");
+      setSnackbarMessage(`${error.response.data}`);
       setOpenSnackbar(true);
     }
 
@@ -303,7 +302,7 @@ const FullCalendarTimeline: React.FC = () => {
         <Dialog open={openEventDialog} onClose={handleEventDialogClose}>
           <DialogContent>
             <h2>Schedule Appointment</h2>
-            <p>Event ID: {selectedAppointmentId}</p>
+            <p>Event Title: {appointments.find(app => app.id === selectedAppointmentId)?.title}</p>
             {selectedAppointmentId &&
             currentUser?.uid !== selectedBookedById &&
             !selectedAppointmentAvailability ? (

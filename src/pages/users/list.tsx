@@ -25,6 +25,7 @@ import { getUsers, deleteUser } from "./userService";
 import type { User } from "./model";
 import { Outlet, useNavigate } from "react-router-dom";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
+import { useAuth } from "../../config/AuthContext";
 
 const UserTable = () => {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ const UserTable = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<AlertProps["severity"]>("success");
   const [loading, setLoading] = useState(true); // Loading state
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -50,7 +52,7 @@ const UserTable = () => {
         setSnackbarMessage("Error fetching users");
         setOpenSnackbar(true);
       } finally {
-        setLoading(false); // Turn off loading indicator regardless of success or failure
+        setLoading(false);
       }
     };
 
@@ -72,9 +74,9 @@ const UserTable = () => {
   };
 
   const handleConfirmDelete = async () => {
-    if (selectedUserId) {
+    if (selectedUserId && currentUser) {
       try {
-        await deleteUser(selectedUserId);
+        await deleteUser(selectedUserId, currentUser?.uid);
         setUsers((prevUsers) =>
           prevUsers?.filter(
             (user) => user.id.toString() !== selectedUserId.toString()
@@ -82,9 +84,9 @@ const UserTable = () => {
         );
         setSnackbarMessage("User deleted successfully");
         setOpenSnackbar(true);
-      } catch (error) {
-        console.error(error);
-        setSnackbarMessage("Error deleting user");
+      } catch (error:any) {
+        setSnackbarSeverity("error");
+        setSnackbarMessage(`${error.response.data}`);
         setOpenSnackbar(true);
       }
     }

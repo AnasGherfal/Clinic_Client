@@ -46,25 +46,40 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
           const tokenResult = await user.getIdTokenResult();
           const expirationTimestamp = new Date(
             tokenResult.expirationTime
-          ).toUTCString();
-          const currentTime = new Date().toUTCString();
-          const expirationTimestampMillis = Date.parse(expirationTimestamp); // Convert expiration time string to milliseconds
-          const currentTimeMillis = Date.parse(currentTime);
-      
+          ).getTime();
+          const currentTime = new Date().getTime();
 
-          if (expirationTimestampMillis <= currentTimeMillis) {
-            await SignOut();
-            setCurrentUser(null);
+          if (expirationTimestamp <= currentTime) {
+            // Token expired, refresh it
+            const refreshedToken = await user.getIdToken(true); // Pass true to force refresh
+            localStorage.setItem("authToken", refreshedToken);
           } else {
-            const timeUntilExpiration =
-              expirationTimestampMillis - currentTimeMillis;
+            // Token is not expired, check for inactivity timeout
+            const inactivityTimeoutMillis = 30 * 60 * 1000; // 30 minutes
+            const lastActivityTime = parseInt(
+              localStorage.getItem("lastActivityTime") || "0"
+            );
+            const currentTime = new Date().getTime();
 
+            if (currentTime - lastActivityTime > inactivityTimeoutMillis) {
+              // User has been inactive for too long, sign them out
+              await SignOut();
+              setCurrentUser(null);
+              return; // Exit early to prevent further execution
+            }
           }
-        } catch (error) {}
+
+          // Store the last activity time to check for inactivity timeout
+          localStorage.setItem("lastActivityTime", currentTime.toString());
+        } catch (error) {
+          console.error("Error refreshing token:", error);
+          // Handle error refreshing token
+        }
       }
     };
 
     checkTokenExpiration();
+
     return () => {
       unsubscribe();
     };
