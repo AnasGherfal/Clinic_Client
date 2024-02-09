@@ -131,9 +131,12 @@ const FullCalendarTimeline: React.FC = () => {
       }
     } else {
       try {
-        await getAppointmentById(id);
+        if (currentUser) {
+
+        await getAppointmentById(id, currentUser?.token);
 
         setOpenEventDialog(true);
+        }
       } catch (error) {
         console.error("Error fetching appointment details:", error);
       }
@@ -157,17 +160,20 @@ const FullCalendarTimeline: React.FC = () => {
 
   const handleCreateAppointmentSubmit = async () => {
     try {
+      if (currentUser) {
+
       await createAppointment({
         title: appointmentTitle,
         start: startDate,
         end: endDate,
-      });
+      },  currentUser?.token);
 
       setSnackbarMessage("Appointment created successfully!");
       setOpenSnackbar(true);
       setAppointmentTitle("");
       setStartDate(null);
       setEndDate(null);
+    }
     } catch (error:any) {
       setSnackbarSeverity("error");
       setSnackbarMessage(`${error.response.data}`);
@@ -178,12 +184,12 @@ const FullCalendarTimeline: React.FC = () => {
   };
 
   const handleScheduleAppointment = async (id: any) => {
-    if (id) {
+    if (id && currentUser) {
       try {
         await scheduleAppointment(currentUser?.uid || "", id, {
           userId: currentUser?.uid,
           appointmentId: id,
-        });
+        },  currentUser?.token);
         setOpenEventDialog(false);
         setSnackbarMessage("Appointment scheduled successfully!");
         setOpenSnackbar(true);
@@ -198,13 +204,17 @@ const FullCalendarTimeline: React.FC = () => {
 
   const handleCancelAppointment = async (id: any) => {
     try {
+      if (currentUser) {
+
       await cancelAppointment(
         currentUser?.uid || "",
-        selectedAppointmentId || ""
+        selectedAppointmentId || "",
+        currentUser?.token
       );
       setOpenEventDialog(false);
       setSnackbarMessage("Appointment canceled successfully!");
       setOpenSnackbar(true);
+      }
     } catch (error) {
       console.error("Error canceling appointment:", error);
       setSnackbarMessage("Error canceling appointment.");

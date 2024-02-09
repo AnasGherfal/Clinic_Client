@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TextField, Button, Typography, Container, Paper } from '@mui/material';
 import { getUserById, updateUser } from './userService';
+import { useAuth } from '../../config/AuthContext';
 
 const EditUser = () => {
   const { id } = useParams();
@@ -13,12 +14,13 @@ const EditUser = () => {
     status:'',
   });
   const [isEditing, setIsEditing] = useState(false);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        if (id) {
-          const user = await getUserById(id);
+        if (id  && currentUser) {
+          const user = await getUserById(id, currentUser?.token);
           setUserData(user);
         }
       } catch (error) {
@@ -42,8 +44,8 @@ const EditUser = () => {
     e.preventDefault();
 
     try {
-      if (id && isEditing) {
-        await updateUser(id, userData);
+      if (id && isEditing && currentUser) {
+        await updateUser(id, userData, currentUser?.token);
         setIsEditing(false); // Disable editing after submission
         navigate('/users'); // Navigate to the user list page after a successful update
       }

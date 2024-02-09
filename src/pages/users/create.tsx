@@ -3,6 +3,7 @@ import { TextField, Button, Typography, Paper, Grid } from "@mui/material";
 import { UserCreate } from "./model";
 import { createUser } from "./userService"; // Import the createUser function
 import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useAuth } from "../../config/AuthContext";
 
 const Create: React.FC = () => {
   const [user, setUser] = useState<UserCreate>({
@@ -11,6 +12,7 @@ const Create: React.FC = () => {
     email: "",
   });
   const navigate = useNavigate(); // Initialize useNavigate
+  const { currentUser } = useAuth();
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -21,8 +23,8 @@ const Create: React.FC = () => {
 
   const handleAddUser = async () => {
     try {
-      // Call the createUser function from userService.ts
-      await createUser(user);
+      if (currentUser) {
+        await createUser(user, currentUser?.token);
       // You may want to reset the form or perform other actions after adding the user
       setUser({
         firstName: "",
@@ -30,6 +32,7 @@ const Create: React.FC = () => {
         email: "",
       });
       navigate("/users"); // Navigate to the specified route
+    }
     } catch (error) {
       // Handle error, display a message, or perform other actions
       console.error("Error adding user:", error);

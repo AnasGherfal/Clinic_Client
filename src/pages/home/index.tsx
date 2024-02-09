@@ -15,6 +15,7 @@ import dentist from "../../assets/pics/Dentist-Check-Up.jpg";
 import checkUp from "../../assets/pics/check-up.jpeg";
 import babyCheck from "../../assets/pics/newborn-check.jpg";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../config/AuthContext";
 
 
 
@@ -41,7 +42,8 @@ const Home = () => {
   const isSm = useMediaQuery(theme.breakpoints.up("sm"));
   const isMd = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
-
+  const { currentUser } = useAuth();
+console.log(currentUser)
   return (
     <Layout>
       <ThemeProvider theme={theme}>

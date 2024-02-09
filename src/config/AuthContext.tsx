@@ -12,6 +12,7 @@ import Loading from "../components/general/Loading";
 interface User {
   uid: string;
   email: string;
+  token:string;
 }
 
 interface AuthContextProps {
@@ -26,11 +27,12 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [lastActivityTime, setLastActivityTime] = useState<number>(Date.now());
 
   useEffect(() => {
     const unsubscribe = firebaseAuth.onAuthStateChanged(
       async (user: any) => {
-        setCurrentUser(user ? { uid: user.uid, email: user.email } : null);
+        setCurrentUser(user ? { uid: user.uid, email: user.email,  token: await user.getIdToken() } : null);
         setLoading(false);
       },
       (authError) => {
@@ -44,53 +46,56 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
       if (user) {
         try {
           const tokenResult = await user.getIdTokenResult();
+       
+ 
           const expirationTimestamp = new Date(
             tokenResult.expirationTime
-          ).getTime();
-          const currentTime = new Date().getTime();
-
+          ).toUTCString(); 
+          const currentTime = new Date().toUTCString();
+   
           if (expirationTimestamp <= currentTime) {
-            // Token expired, refresh it
-            const refreshedToken = await user.getIdToken(true); // Pass true to force refresh
-            localStorage.setItem("authToken", refreshedToken);
-          } else {
-            // Token is not expired, check for inactivity timeout
-            const inactivityTimeoutMillis = 30 * 60 * 1000; // 30 minutes
-            const lastActivityTime = parseInt(
-              localStorage.getItem("lastActivityTime") || "0"
-            );
-            const currentTime = new Date().getTime();
-
-            if (currentTime - lastActivityTime > inactivityTimeoutMillis) {
-              // User has been inactive for too long, sign them out
-              await SignOut();
-              setCurrentUser(null);
-              return; // Exit early to prevent further execution
-            }
-          }
-
-          // Store the last activity time to check for inactivity timeout
-          localStorage.setItem("lastActivityTime", currentTime.toString());
-        } catch (error) {
-          console.error("Error refreshing token:", error);
-          // Handle error refreshing token
-        }
-      }
+            await SignOut();
+            setCurrentUser(null);
+          } 
+        } catch (error) {}
+      } 
     };
 
     checkTokenExpiration();
+    const handleActivity = () => {
+      setLastActivityTime(Date.now());
+    };
+
+    const checkInactivity = () => {
+      const currentTime = Date.now();
+      const inactiveDuration = currentTime - lastActivityTime;
+      const maxInactiveTime = 15 * 60 * 1000; // 15 minutes
+      if (inactiveDuration > maxInactiveTime) {
+        SignOut();
+        setCurrentUser(null);
+      }
+    };
+
+    // Listen to user activity
+    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("keydown", handleActivity);
+
+    // Check for inactivity periodically
+    const inactivityInterval = setInterval(checkInactivity, 5 * 60 * 1000); // Check every 5 minutes
 
     return () => {
       unsubscribe();
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      clearInterval(inactivityInterval);
     };
-  }, []);
+  }, [lastActivityTime]);
 
   if (loading) {
     return <Loading />;
   }
 
   if (error) {
-    // You can render an error message or redirect the user to an error page
     return <div>Error: {error.message}</div>;
   }
 
@@ -101,10 +106,10 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextProps => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

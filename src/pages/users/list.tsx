@@ -43,10 +43,13 @@ const UserTable = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const fetchedUsers = await getUsers();
+        if ( currentUser) {
+
+        const fetchedUsers = await getUsers(currentUser?.token);
         setUsers(fetchedUsers);
         setSnackbarMessage("Users fetched successfully");
         setOpenSnackbar(true);
+        }
       } catch (error) {
         setSnackbarSeverity("error");
         setSnackbarMessage("Error fetching users");
@@ -76,7 +79,7 @@ const UserTable = () => {
   const handleConfirmDelete = async () => {
     if (selectedUserId && currentUser) {
       try {
-        await deleteUser(selectedUserId, currentUser?.uid);
+        await deleteUser(selectedUserId, currentUser?.uid, currentUser?.token);
         setUsers((prevUsers) =>
           prevUsers?.filter(
             (user) => user.id.toString() !== selectedUserId.toString()

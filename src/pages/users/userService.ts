@@ -1,34 +1,44 @@
-// userService.ts
-
 import httpClient from "../../services/http-client";
 import { UserCreate } from "./model";
 
-export const getUsers = async () => {
+export const getUsers = async (token: string) => {
   try {
-    const response = await httpClient.get(`users`);
+    const response = await httpClient.get(`users`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    return response.data; 
+    return response?.data; 
   } catch (error) {
     console.error(error);
     throw error; 
   }
 };
 
-export const createUser = async (userData: UserCreate) => {
+export const createUser = async (userData: UserCreate, token: string) => {
   try {
-    const response = await httpClient.post(`user`, userData);
+    const response = await httpClient.post(`user`, userData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    return response.data; 
+    return response?.data; 
   } catch (error) {
     throw error; 
   }
 };
 
-export const getUserById = async (userId: string) => {
+export const getUserById = async (userId: string, token: string) => {
   try {
-    const response = await httpClient.get(`user/${userId}`);
+    const response = await httpClient.get(`user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    return response.data; 
+    return response?.data; 
   } catch (error) {
     console.error(error);
     throw error; 
@@ -37,25 +47,41 @@ export const getUserById = async (userId: string) => {
 
 export const updateUser = async (
   userId: string,
-  updatedUserData: UserCreate
+  updatedUserData: UserCreate,
+  token: string
 ) => {
   try {
-    const response = await httpClient.put(`user/${userId}`, updatedUserData);
+    const response = await httpClient.put(`user/${userId}`, updatedUserData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    return response.data; 
+    return response?.data; 
   } catch (error) {
     console.error(error);
     throw error;
   }
 };
 
-export const deleteUser = async (userId: string,requestingUserId: string) => {
+export const deleteUser = async (
+  userId: string,
+  requestingUserId: string,
+  token: string
+) => {
   try {
-    const response = await httpClient.delete(`user/${userId}`, { data: { requestingUserId } });
+    const response = await httpClient.delete(`user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        requestingUserId: requestingUserId,
+      },
+    });
 
-    return response.data; 
+    return response?.data;
   } catch (error) {
     console.error(error);
-    throw error; 
+    throw error;
   }
 };
