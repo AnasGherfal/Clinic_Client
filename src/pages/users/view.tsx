@@ -24,7 +24,6 @@ const EditUser = () => {
           setUserData(user);
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
       }
     };
 
@@ -50,7 +49,6 @@ const EditUser = () => {
         navigate('/users'); // Navigate to the user list page after a successful update
       }
     } catch (error) {
-      console.error('Error updating user data:', error);
     }
   };
 

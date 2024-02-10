@@ -11,7 +11,6 @@ export const getUsers = async (token: string) => {
 
     return response?.data; 
   } catch (error) {
-    console.error(error);
     throw error; 
   }
 };
@@ -40,7 +39,6 @@ export const getUserById = async (userId: string, token: string) => {
 
     return response?.data; 
   } catch (error) {
-    console.error(error);
     throw error; 
   }
 };
@@ -59,7 +57,6 @@ export const updateUser = async (
 
     return response?.data; 
   } catch (error) {
-    console.error(error);
     throw error;
   }
 };
@@ -81,7 +78,6 @@ export const deleteUser = async (
 
     return response?.data;
   } catch (error) {
-    console.error(error);
     throw error;
   }
 };

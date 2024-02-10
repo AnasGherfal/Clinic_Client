@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { TextField, Button, Typography, Paper, Grid } from "@mui/material";
+import { TextField, Button, Typography, Paper, Grid, Snackbar } from "@mui/material";
 import { UserCreate } from "./model";
 import { createUser } from "./userService"; // Import the createUser function
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { useAuth } from "../../config/AuthContext";
+import MuiAlert, { AlertProps } from "@mui/material/Alert";
+
 
 const Create: React.FC = () => {
   const [user, setUser] = useState<UserCreate>({
@@ -11,8 +13,12 @@ const Create: React.FC = () => {
     lastName: "",
     email: "",
   });
+
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const navigate = useNavigate(); // Initialize useNavigate
   const { currentUser } = useAuth();
+  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertProps["severity"]>("success");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -23,6 +29,12 @@ const Create: React.FC = () => {
 
   const handleAddUser = async () => {
     try {
+      if (!user.firstName || !user.lastName || !user.email) {
+        setSnackbarSeverity("error");
+        setSnackbarMessage("Please fill out all fields.");
+        setOpenSnackbar(true);
+        return;
+      }
       if (currentUser) {
         await createUser(user, currentUser?.token);
       // You may want to reset the form or perform other actions after adding the user
@@ -31,14 +43,20 @@ const Create: React.FC = () => {
         lastName: "",
         email: "",
       });
+      setSnackbarMessage("User created successfully");
+      setOpenSnackbar(true);
       navigate("/users"); // Navigate to the specified route
     }
-    } catch (error) {
-      // Handle error, display a message, or perform other actions
-      console.error("Error adding user:", error);
+    } catch (error:any) {
+      setSnackbarSeverity("error");
+      setSnackbarMessage(`${error.response.data}`);
+      setOpenSnackbar(true);
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
   const handleGoBack = () => {
     navigate(-1); // Go back to the previous route
   };
@@ -77,6 +95,16 @@ const Create: React.FC = () => {
               onChange={(e: any) => handleInputChange(e, "email")}
             />
           </Grid>
+          <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+        >
+          {snackbarMessage}
+        </MuiAlert>
+      </Snackbar>
           <Grid item xs={12}>
             <Button variant="contained" color="primary" onClick={handleAddUser}>
               Add User
@@ -88,6 +116,7 @@ const Create: React.FC = () => {
             >
               Go Back
             </Button>
+            
           </Grid>
         </Grid>
       </form>

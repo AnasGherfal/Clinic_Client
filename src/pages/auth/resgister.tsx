@@ -55,7 +55,6 @@ function Registration() {
       navigate("/");
     } catch (error:any) {
       // Handle registration errors here
-      console.error("Error during registration:", error.message);
     }
   };
 

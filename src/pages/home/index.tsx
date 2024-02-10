@@ -1,4 +1,3 @@
-import React from "react";
 import Layout from "../../layout";
 import {
   Box,
@@ -15,9 +14,6 @@ import dentist from "../../assets/pics/Dentist-Check-Up.jpg";
 import checkUp from "../../assets/pics/check-up.jpeg";
 import babyCheck from "../../assets/pics/newborn-check.jpg";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../config/AuthContext";
-
-
 
 const theme = createTheme({
   components: {
@@ -42,8 +38,6 @@ const Home = () => {
   const isSm = useMediaQuery(theme.breakpoints.up("sm"));
   const isMd = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
-console.log(currentUser)
   return (
     <Layout>
       <ThemeProvider theme={theme}>
@@ -61,8 +55,7 @@ console.log(currentUser)
             Providing Quality Healthcare for a Healthier Tomorrow
           </Typography>
           <Button
-          onClick={() => navigate('/appointments')}
-
+            onClick={() => navigate("/appointments")}
             variant="contained"
             sx={{ backgroundColor: "#2358ba" }}
           >

@@ -40,7 +40,6 @@ export const getAppointmentById = async (appointmentId: string, token: string) =
 
     return response.data;
   } catch (error) {
-    console.error(error);
     throw error;
   }
 };
@@ -64,7 +63,6 @@ export const scheduleAppointment = async (
 
     return response.data;
   } catch (error) {
-    console.error(error);
     throw error;
   }
 };
@@ -86,7 +84,6 @@ export const cancelAppointment = async (
 
     return response.data;
   } catch (error) {
-    console.error(error);
     throw error;
   }
 };

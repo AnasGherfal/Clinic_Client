@@ -138,7 +138,6 @@ const FullCalendarTimeline: React.FC = () => {
         setOpenEventDialog(true);
         }
       } catch (error) {
-        console.error("Error fetching appointment details:", error);
       }
     }
   };
@@ -194,7 +193,6 @@ const FullCalendarTimeline: React.FC = () => {
         setSnackbarMessage("Appointment scheduled successfully!");
         setOpenSnackbar(true);
       } catch (error: any) {
-        console.error("Error scheduling appointment:", error);
         setSnackbarSeverity("error");
         setSnackbarMessage(`${error.response.data}`);
         setOpenSnackbar(true);
@@ -216,7 +214,6 @@ const FullCalendarTimeline: React.FC = () => {
       setOpenSnackbar(true);
       }
     } catch (error) {
-      console.error("Error canceling appointment:", error);
       setSnackbarMessage("Error canceling appointment.");
       setOpenSnackbar(true);
     }
