@@ -2,6 +2,11 @@
 
 You can view the live/hosted React project [here](https://clinic-whnd.onrender.com).
 
+To access the project, you can use the following credentials:
+
+- **Email:** test@test.com
+- **Password:** 12345678
+
 ## The Backend
 
 [here](https://github.com/AnasGherfal/Clinic).
